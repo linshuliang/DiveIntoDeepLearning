@@ -1,17 +1,9 @@
-# Author: Robert Guthrie
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
 torch.manual_seed(1)
-
-word_to_ix = {"hello": 0, "world": 1}
-embeds = nn.Embedding(2, 5)  # 2 words in vocab, 5 dimensional embeddings
-lookup_tensor = torch.tensor([word_to_ix["hello"]], dtype=torch.long)
-hello_embed = embeds(lookup_tensor)
-print(hello_embed)
 
 CONTEXT_SIZE = 2
 EMBEDDING_DIM = 10
@@ -55,7 +47,9 @@ class NGramLanguageModeler(nn.Module):
         self.linear2 = nn.Linear(128, vocab_size)
 
     def forward(self, inputs):
+        # print(self.embeddings(inputs).shape) # torch.Size([2, 10])
         embeds = self.embeddings(inputs).view((1, -1))
+        # print(embeds.shape) # torch.Size([1, 20])
         out = F.relu(self.linear1(embeds))
         out = self.linear2(out)
         log_probs = F.log_softmax(out, dim=1)
@@ -73,7 +67,8 @@ for epoch in range(10):
         # Step 1. Prepare the inputs to be passed to the model (i.e, turn the words
         # into integer indices and wrap them in tensors)
         context_idxs = torch.tensor([word_to_ix[w] for w in context], dtype=torch.long)
-
+        # print(context_idxs.shape) # torch.Size([2])
+        
         # Step 2. Recall that torch *accumulates* gradients. Before passing in a
         # new instance, you need to zero out the gradients from the old
         # instance
@@ -82,6 +77,8 @@ for epoch in range(10):
         # Step 3. Run the forward pass, getting log probabilities over next
         # words
         log_probs = model(context_idxs)
+        # print(len(vocab)) # 97
+        # print(log_probs.shape) # torch.Size([1, 97])
 
         # Step 4. Compute your loss function. (Again, Torch wants the target
         # word wrapped in a tensor)
@@ -97,4 +94,6 @@ for epoch in range(10):
 
 
 # To get the embedding of a particular word, e.g. "beauty"
-print(model.embeddings.weight[word_to_ix["beauty"]])
+word_embedding = model.embeddings.weight[word_to_ix["beauty"]]
+print(word_embedding.shape) # torch.Size([10]), EMBEDDING_DIM is 10
+print(word_embedding)

@@ -1,9 +1,13 @@
 import torch
 import torch.nn as nn
 
+torch.manual_seed(1)
+
+
 def make_context_vector(context, word_to_ix):
     idxs = [word_to_ix[w] for w in context]
     return torch.tensor(idxs, dtype=torch.long)
+
 
 CONTEXT_SIZE = 2  # 2 words to the left, 2 to the right
 EMDEDDING_DIM = 100
@@ -19,6 +23,7 @@ we conjure the spirits of the computer with our spells.""".split()
 # By deriving a set from `raw_text`, we deduplicate the array
 vocab = set(raw_text)
 vocab_size = len(vocab)
+print(f"vocab_size: {vocab_size}")  # 49
 
 word_to_ix = {word:ix for ix, word in enumerate(vocab)}
 ix_to_word = {ix:word for ix, word in enumerate(vocab)}
@@ -83,6 +88,7 @@ for epoch in range(50):
 context = ['People','create','to', 'direct']
 context_vector = make_context_vector(context, word_to_ix)
 a = model(context_vector)
+print(a.shape) # torch.Size([1, 49]), vocab_size is 49
 
 #Print result
 print(f'Raw text: {" ".join(raw_text)}\n')
