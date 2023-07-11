@@ -24,7 +24,7 @@ print(embeddings_norm.shape) # (vocab_size, 300)
 print(type(vocab.get_itos()), len(vocab.get_itos()), type(vocab.get_itos()[0])) # <class 'list'> 4099 <class 'str'>
 print(vocab.get_itos())
 
-
+# Find Similar Words
 def get_top_similar(word: str, topN: int = 10):
     word_id = vocab[word]
     print(f"word_id: {word_id}")
@@ -52,3 +52,23 @@ def get_top_similar(word: str, topN: int = 10):
 
 for word, sim in get_top_similar("father").items(): # gernamy
     print("{}: {:.3f}".format(word, sim))
+
+
+# Vector Equations
+print("\n\nVector Equations")
+emb1 = embeddings[vocab["bigger"]]
+emb2 = embeddings[vocab["big"]]
+emb3 = embeddings[vocab["small"]]
+
+emb4 = emb1 - emb2 + emb3
+emb4_norm = (emb4 ** 2).sum() ** (1 / 2)
+emb4 = emb4 / emb4_norm
+
+emb4 = np.reshape(emb4, (len(emb4), 1))
+dists = np.matmul(embeddings_norm, emb4).flatten()
+
+top5 = np.argsort(-dists)[:5]
+print(top5)
+
+for word_id in top5:
+    print("{}: {:.3f}".format(vocab.lookup_token(word_id), dists[word_id]))
